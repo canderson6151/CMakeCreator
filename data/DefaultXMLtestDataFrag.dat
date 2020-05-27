@@ -1,0 +1,16 @@
+      
+      if(EXISTS "${CMAKE_SOURCE_DIR}/${mainExecName}.xml")
+      
+        file(COPY "${mainExecName}.xml" DESTINATION "${CMAKE_SOURCE_DIR}/Testing/${mainExecName}")
+        
+        set (test_parameters -f "${mainExecName}.xml")
+
+        add_test(NAME    ${mainExecName} WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Testing/${mainExecName}"
+        COMMAND "${CMAKE_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/${mainExecName}" ${test_parameters} )
+        
+      else()
+
+        add_test(NAME  ${mainExecName} WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Testing/${mainExecName}"
+        COMMAND "${CMAKE_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/${mainExecName}")
+        
+      endif()

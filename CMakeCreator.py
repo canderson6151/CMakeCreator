@@ -1,0 +1,626 @@
+import os
+import sys
+import argparse
+import subprocess
+from datetime import datetime
+from pathlib import Path
+
+from XML_ParameterListArray import XML_ParameterListArray
+from string import Template
+
+
+        
+class CMakeCreator(object):
+  
+  def __init__(self):
+        self.CMakeCreatorDataDir = None
+        self.CMakeListDataFile   = None
+        self.localDirectory      = os.getcwd()
+        self.verboseFlag         = False
+        
+        self.linuxDebugOptions            = None
+        self.visualStudioDebugOptions     = None
+        self.macDebugOptions              = None
+    
+        self.linuxReleaseOptions           = None
+        self.visualStudioReleaseOptions    = None
+        self.macReleaseOptions             = None      
+
+        
+  def parseOptions(self):
+      parser = argparse.ArgumentParser()
+      parser.add_argument('--xmldatafile',"-x",dest='xmldatafile',default=None, help="Specify xml file containing CMakeList.txt construction data")
+      parser.add_argument('--samplefile',"-s",action='store_true', dest='samplefileFlag', help="Creates sample input *.xml file")
+      parser.add_argument('--basicSamplefile',"-b",action='store_true', dest='basicSamplefileFlag', help="Creates sample input *.xml file with minimal commenting.")
+      parser.add_argument('--verbose',"-v",action='store_true', dest='verboseFlag', help="Output to screen and CMakeLists.txt file")
+    
+      args = parser.parse_args()
+      if(args.samplefileFlag):
+        sampleFile = Path(self.get_script_path())/"data"/"CMakeCreatorSample.xml"
+        try :
+          f = open(sampleFile,'r')
+          sampleFileContents = f.read()
+          f.close()
+          
+          fout = open("CMakeCreatorSample.xml",'w')
+          fout.write(sampleFileContents)
+          fout.close()
+          print("Sample XML file written to : CMakeCreatorSample.xml")
+          exit()
+        except OSError as err:
+          print (' === Error ===')
+          print ("Sample XML file cannot be created")
+          print (err)
+          exit()
+      if(args.basicSamplefileFlag):
+        sampleFile = Path(self.get_script_path())/"data"/"CMakeCreatorSampleThin.xml"
+        try :
+          f = open(sampleFile,'r')
+          sampleFileContents = f.read()
+          f.close()
+          
+          fout = open("CMakeCreatorSample.xml",'w')
+          fout.write(sampleFileContents)
+          fout.close()
+          print("Basic sample XML file written to : CMakeCreatorSample.xml")
+          exit()
+        except OSError as err:
+          print (' === Error ===')
+          print ("Sample XML file cannot be created")
+          print (err)
+          exit()
+      self.CMakeListDataFile   = args.xmldatafile
+      self.verboseFlag         = args.verboseFlag
+      
+    
+  def run(self): 
+    print ("Running CMakeCreator")
+    self.CMakeCreatorDataDir = self.get_script_path() + "/data"
+    
+    self.parseOptions()
+    if(self.CMakeListDataFile  == None):
+      print("Desired file containing CMakeLists data specified with -x option ")
+      sys.exit(1)
+
+    paramList = XML_ParameterListArray(self.CMakeListDataFile)
+    
+    fragmentFile = "CMakeBaseFrag.tpl"
+    fragmentData = {}
+    fragmentData["required_cmake"]     = paramList.getParameterValue("required_cmake","Common")
+    fragmentData["project"]            = paramList.getParameterValue("project","Common")
+    fragmentData["XML_InputFile"]       = self.CMakeListDataFile
+    fragmentData["Date"]               =  '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.now())
+
+
+    #################################################################
+    #################################################################
+    #                  Common settings
+    #################################################################
+    #################################################################
+    
+    #
+    # Start off with text in CMakeBaseFrag to specify
+    # required version, project name and build information
+    #
+    
+    cmakeContents = self.createFragment(fragmentFile,fragmentData)
+    
+    
+    #
+    # Capture global include directories
+    #
+    
+    cmakeContents += "#\n"
+    cmakeContents += "# Global include directories \n"
+    cmakeContents += "#\n"
+    cmakeContents += "\n"
+    cmakeContents += "list(APPEND IncludeDirs \"${CMAKE_SOURCE_DIR}\")\n" 
+    
+
+    commonList = paramList.getParameterList("Common")
+      
+    if(commonList != None):
+        for p in commonList:
+            if(p.tag == "IncludeDirs"):
+                directories = p.findall("dir")
+                for q in directories:
+                    cmakeContents += "list(APPEND IncludeDirs \"${CMAKE_SOURCE_DIR}/" + paramList.getValue(q) + "\")\n"                   
+    
+    #
+    # Capture additional compiler options  
+    #
+    
+    self.linuxDebugOptions         = ""
+    self.visualStudioDebugOptions  = ""
+    self.macDebugOptions           = ""
+    if(commonList != None):
+        for p in commonList:
+            if(p.tag == "AdditionalDebugOptions"):
+                optionValues = p.findall("linuxOption")
+                for q in optionValues:
+                    self.linuxDebugOptions += "\"" + paramList.getValue(q) + "\" "
+                optionValues = p.findall("visualStudioOption")
+                for q in optionValues:
+                    self.visualStudioDebugOptions += "\"" + paramList.getValue(q) + "\" "
+                optionValues = p.findall("macOption")
+                for q in optionValues:
+                    self.macDebugOptions += "\"" + paramList.getValue(q) +  "\" "          
+     
+    self.linuxReleaseOptions         = ""
+    self.visualStudioReleaseOptions  = ""
+    self.macReleaseOptions           = ""
+    
+    if(commonList != None):
+        for p in commonList:
+            if(p.tag == "AdditionalReleaseOptions"):
+                optionValues = p.findall("linuxOption")
+                for q in optionValues:
+                    self.linuxReleaseOptions += "\"" + paramList.getValue(q) + "\" "
+                optionValues = p.findall("visualStudioOption")
+                for q in optionValues:
+                    self.visualStudioReleaseOptions += "\"" + paramList.getValue(q) + "\" "
+                optionValues = p.findall("macOption")
+                for q in optionValues:
+                    self.macReleaseOptions += "\"" + paramList.getValue(q) +  "\" "  
+     
+    #                                 
+    # Specify cmake modules directory paths
+    #
+    
+    if(commonList != None):
+        for p in commonList:
+            if(p.tag == "CMakeModulesDir"):
+                cmakeContents += "\n"
+                cmakeContents += "#\n"
+                cmakeContents += "# Cmake modules directories \n"
+                cmakeContents += "#\n"
+                cmakeContents += "\n"
+                directories = p.findall("dir")
+                for q in directories:
+                    cmakeContents += "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/" + paramList.getValue(q) + "\")\n"
+    
+    #
+    #################################################################
+    # Specify libraries to be built as specified by option values 
+    #################################################################
+    #
+    
+    externalLibraryFlag = False
+    libraryCount        = 0
+    if(commonList != None):
+        for p in commonList:
+            if(p.tag == "Library"): 
+                libraryCount += 1
+                if(libraryCount == 1):
+                    cmakeContents += "\n"
+                    cmakeContents += "\n"
+                    cmakeContents += "#####################################################\n"
+                    cmakeContents += "# Invoke build of supporting libraries (projects)    \n"
+                    cmakeContents += "#####################################################\n"
+    
+                externalLibraryFlag = True            
+                cmakeContents += "\n"
+                libDir  = p.find("libDir")
+                libName = p.find("libName")
+                cmakeContents += "add_subdirectory(\"${CMAKE_SOURCE_DIR}/" + paramList.getValue(libDir) + "\" "
+                cmakeContents += "\"${CMAKE_SOURCE_DIR}/" + paramList.getValue(libDir) + "/build\")\n"
+                cmakeContents +=  "list(APPEND ExternalLibs \"" + paramList.getValue(libName) +  "\")\n"
+      
+    OptionNames = []
+    if(paramList.isParameterList("Options")):
+      OptionNames = paramList.getParameterNames("Options")
+    
+    if(OptionNames != []):
+        cmakeContents += "\n"
+        cmakeContents += "#####################################################\n"
+        cmakeContents += "# Collecting data for components specified by options \n"
+        cmakeContents += "#####################################################\n"
+    
+        cmakeContents += "\n#\n"
+        cmakeContents += "# Specify cmake option value using -DOption_Name=ON (or = OFF)  \n" 
+        cmakeContents += "# to override default\n"
+        cmakeContents += "#\n"
+
+    for p in OptionNames :
+        val = paramList.getParameterValue(p,"Options")
+        cmakeContents += "\nOPTION(" + p + "  \"Option " + p + "\"  " + val + ")" 
+    
+    lapackFlag = False
+    for p in OptionNames :
+        val = paramList.getParameterValue(p,"Options")
+        if((p == "USE_LAPACK")):
+            cmakeContents += "\n"
+            cmakeContents += self.getFragment("LapackFrag.dat")
+            lapackFlag = True
+        if((p == "USE_OPENMP")):
+            cmakeContents += "\n"
+            cmakeContents += self.getFragment("OpenMPfrag.dat")
+        if((p == "USE_FFTW")):
+            cmakeContents += "\n"
+            cmakeContents += self.getFragment("FFTWfrag.dat")           
+        if((p == "USE_SQLITE3")):
+            cmakeContents += "\n"
+            cmakeContents += self.getFragment("SQlite3frag.dat") 
+        if((p == "USE_MEMCHECK")):
+            cmakeContents += "\n"
+            cmakeContents += self.getFragment("MemCheckFrag.dat")             
+
+
+
+    # Enable testing if specified in any of the targets
+    
+    targetParams = paramList.getParameterList("BuildTargets")
+        
+    ctestingFlag    = False
+    for p in targetParams:
+        ctestFlagParam = p.find("ctest")
+        if(ctestFlagParam != None) : 
+            ctestFlag = paramList.getValue(ctestFlagParam)
+            if(ctestFlag) : ctestingFlag = True 
+
+    if(ctestingFlag) :
+        cmakeContents += "\n"
+        cmakeContents += "#\n"
+        cmakeContents += "# Enable testing \n"
+        cmakeContents += "#\n"
+        cmakeContents += "\n"  
+        cmakeContents += "enable_testing()\n"
+        
+    #################################################################
+    #################################################################
+    #                   Specify targets 
+    #################################################################
+    #################################################################
+    
+    
+    targetParams = paramList.getParameterList("BuildTargets")
+    
+    # 
+    #    Create a list of main sources 
+    #
+    
+    
+    cmakeContents += "\n"
+    cmakeContents += "#####################################################\n"
+    cmakeContents += "# Specify list of target sources containing \"main\"  \n"
+    cmakeContents += "#####################################################\n"
+    
+    Main_Sources = ""
+    
+    ctestingFlag    = False
+    for p in targetParams:
+        mainSource     = None
+        mainParam      = p.find("main")
+
+        if(mainParam == None):
+            raise Exception("\nError:  <main = ... > parameter specifying main source\n        not specified in <Target>  \n ")
+            
+        mainSource     = paramList.getValue(mainParam)
+        Main_Sources   += "\"" + mainSource + "\" "
+        
+        ctestFlagParam = p.find("ctest")
+        if(ctestFlagParam != None) : 
+            ctestFlag = paramList.getValue(ctestFlagParam)
+            if(ctestFlag) : ctestingFlag = True 
+
+    cmakeContents += "\n"
+    cmakeContents += "set(Main_Sources " + Main_Sources + ")\n"
+  
+
+
+
+    #
+    #################################################################
+    # Loop over targets, specifying target specific information 
+    #################################################################
+    #
+    
+    cmakeContents +=  "\n#\n"
+    cmakeContents +=  "#   Loop over build commands for each target  \n"
+    cmakeContents +=  "#\n"
+    
+    
+    cmakeContents += "\n"  
+    cmakeContents +=  "foreach(mainFile ${Main_Sources} )\n"
+    cmakeContents +=  "string( REPLACE \".cpp\" \"\" mainExecName ${mainFile} )\n\n"
+    
+
+    for p in targetParams:
+        mainSource            = None
+        additionalSources     = []
+        additionalIncludeDirs = []
+        ctestFlag             = False
+        inputFiles            = []
+        commandLineArguments  = None
+        defaultXML            = False
+            
+        sourceFileList = ""  
+        if(p.tag == "Target"):
+            
+            mainParam      = p.find("main")
+
+            if(mainParam == None):
+                raise Exception("\nError:  <main = ... > parameter specifying main source\n        not specified in <Target>  \n ")
+            
+            mainSource      = paramList.getValue(mainParam)
+            sourceFileList += "\"" + mainSource + "\" "
+            
+            additionalSourceParam = p.findall("additionalSource")
+            for q in additionalSourceParam :
+                additionalSources.append(paramList.getValue(q))
+            for q in additionalSources :
+                sourceFileList +=   "\"" + q + "\" "  
+            
+            
+            cmakeContents +=  "##################################################################\n"
+            cmakeContents +=  "#   Target :  " + mainSource.split(".")[0]  + "\n"
+            cmakeContents +=  "##################################################################\n"
+    
+            cmakeContents += "\n"
+            cmakeContents += "    if(\"${mainExecName}.cpp\" STREQUAL \"" + mainSource + "\")\n"
+            cmakeContents += "      add_executable( ${mainExecName} " + sourceFileList + ")\n"
+            
+
+            if(len(OptionNames) != 0) : 
+                cmakeContents +=  "#\n"
+                cmakeContents +=  "#     Supporting libraries and include directories \n"
+                cmakeContents +=  "#\n"
+    
+            
+            for q in OptionNames :
+                val = paramList.getParameterValue(q,"Options")
+                if((q == "USE_LAPACK") and (val == "ON")):
+                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
+                if((q == "USE_OPENMP") and (val == "ON")):
+                    cmakeContents += "      if(OpenMP_CXX_FOUND) \n"
+                    cmakeContents += "         target_link_libraries(${mainExecName} PUBLIC OpenMP::OpenMP_CXX)\n"
+                    cmakeContents += "      endif()\n"
+                if((q == "USE_FFTW") and (val == "ON")):
+                    if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
+                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"         
+                if((q == "USE_SQLITE3") and (val == "ON")):
+                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${SQLite3_LIBRARIES})\n"
+                    cmakeContents += "      target_include_directories(${mainExecName} PUBLIC  ${SQLite3_INCLUDE_DIRS})\n"
+                      
+            if(externalLibraryFlag):
+                cmakeContents += "\n"
+                cmakeContents += "      target_link_libraries(${mainExecName} PUBLIC ${ExternalLibs})\n"
+ 
+            cmakeContents += "\n"
+            cmakeContents += "      target_include_directories(${mainExecName} PUBLIC ${IncludeDirs} ) \n"
+            
+                      
+            additionalIncludeParam = p.findall("additionalIncludeDir")
+            for q in additionalIncludeParam :
+                additionalIncludeDirs.append(paramList.getValue(q))
+            for q in additionalIncludeDirs :
+                cmakeContents += "      target_include_directories(${mainExecName} PUBLIC \"" + q +"\" )\n"
+                
+            ctestFlagParam = p.find("ctest")
+            if(ctestFlagParam != None) : 
+                ctestFlag = paramList.getValue(ctestFlagParam) 
+            
+            if(ctestFlag):
+                
+                cmakeContents +=  "\n"
+                cmakeContents +=  "#      --- Commands for ctest setup ---  \n"
+
+                cmakeContents +=  "\n"
+                cmakeContents +=  "#     Command to induce the creation of Testing/"+ mainSource.split(".")[0]  + " directory \n"
+                
+                
+                cmakeContents += "\n"
+                cmakeContents += "      add_custom_target(\"createTestOutputDir_${mainExecName}\" ALL \n"
+                cmakeContents += "      COMMAND ${CMAKE_COMMAND} -E make_directory \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\")\n"
+                
+                inputFilesParam = p.findall("inputFile")
+                for q in inputFilesParam :
+                    inputFiles.append(paramList.getValue(q))
+                if(len(inputFiles) != 0) : 
+                    cmakeContents += "\n"
+                    cmakeContents +=  "#     Copy test input files to Testing/"+ mainSource.split(".")[0]  + " \n\n"
+                    
+                    
+                for q in inputFiles :
+                    cmakeContents += "      file(COPY \""+ q + "\"  DESTINATION \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\")\n"
+                
+                defaultXMLParam = p.find("defaultXML")
+                if(defaultXMLParam != None) :
+                  defaultXML = paramList.getValue(defaultXMLParam)
+                  
+                if(defaultXML):
+                    cmakeContents += "\n"
+                    cmakeContents +=  "#     defaultXML : If "+ mainSource.split(".")[0]  + ".xml exists then copy to testing   \n"
+                    cmakeContents +=  "#     directory and construct command line input \"-f "+ mainSource.split(".")[0]  + ".xml\"  \n"
+                    cmakeContents += self.getFragment("DefaultXMLtestDataFrag.dat")
+                    cmakeContents += "\n"
+                else:      
+                    ctestArgumentsParam = p.find("ctestArguments")
+                    if(ctestArgumentsParam != None) : 
+                      cmakeContents += "\n"
+                      cmakeContents +=  "#     Specify command line arguments  \n"
+                    
+                      ctestArguments = paramList.getValue(ctestArgumentsParam)  
+                      cmakeContents += "\n"
+                      cmakeContents += "      set (ctestArguments " + ctestArguments + " )\n"
+                      cmakeContents += "\n"
+                      cmakeContents +=  "#     Add target to test set \n"
+                      cmakeContents += "\n"
+                      cmakeContents += "      add_test(NAME  ${mainExecName} WORKING_DIRECTORY \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\"\n"
+                      cmakeContents += "      COMMAND \"${CMAKE_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/${mainExecName}\" ${ctestArguments} )\n"
+                    else:
+                      cmakeContents +=  "\n#     Add target to test set \n"
+                      cmakeContents += "\n"
+                      cmakeContents += "      add_test(NAME  ${mainExecName} WORKING_DIRECTORY \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\"\n"
+                      cmakeContents += "      COMMAND \"${CMAKE_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/${mainExecName}\")\n"
+                      
+
+            cmakeContents += "\n    endif()\n\n"
+            cmakeContents +=  "#----------------------------------------------------------------#\n"
+            cmakeContents += "\n"
+    
+    #
+    #################################################################
+    # Specify compiler properties applied to every target 
+    #################################################################
+    #
+    
+    cmakeContents +=  self.getFragment("CompileFeaturesFrag.dat")
+    
+    cmakeContents += "#\n"
+    cmakeContents += "#  Additional compiler options (operating system dependent)  \n"
+    cmakeContents += "#  Visual studio options if \"Windows\", Mac options if \"Darwin\"  \n"
+    cmakeContents += "#\n"
+    
+    
+    cmakeContents += "    set(ADDITIONAL_DEBUG_OPTIONS \"\")\n"
+    cmakeContents += "    if(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Linux\")\n"
+    if(len(self.linuxDebugOptions) != 0):
+       cmakeContents += "      set(ADDITIONAL_DEBUG_OPTIONS " + self.linuxDebugOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_DEBUG_OPTIONS " + "\"-Wall\"" + ")\n"
+    cmakeContents += "    elseif(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Windows\")\n"
+    if(len(self.visualStudioDebugOptions) != 0):
+        cmakeContents += "      set(ADDITIONAL_DEBUG_OPTIONS " + self.visualStudioDebugOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_DEBUG_OPTIONS " + "\"/Wall\"" + ")\n"
+    
+    cmakeContents += "    elseif(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Darwin\")\n"
+    if(len(self.macDebugOptions) != 0):
+        cmakeContents += "      set(ADDITIONAL_DEBUG_OPTIONS " + self.macDebugOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_DEBUG_OPTIONS " + "\"-Wall\"" + ")\n"
+    cmakeContents += "    endif()\n"
+    cmakeContents += "\n"
+    
+    cmakeContents += "    set(ADDITIONAL_RELEASE_OPTIONS \"\")\n"
+    cmakeContents += "    if(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Linux\")\n"
+    if(len(self.linuxReleaseOptions) != 0):
+       cmakeContents += "      set(ADDITIONAL_RELEASE_OPTIONS " + self.linuxReleaseOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_RELEASE_OPTIONS " + "\"-Wall\"" + ")\n"
+    cmakeContents += "    elseif(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Windows\")\n"
+    if(len(self.visualStudioReleaseOptions) != 0):
+        cmakeContents += "      set(ADDITIONAL_RELEASE_OPTIONS " + self.visualStudioReleaseOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_RELEASE_OPTIONS " + "\"/Wall\"" + ")\n"
+    
+    cmakeContents += "    elseif(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Darwin\")\n"
+    if(len(self.macReleaseOptions) != 0):
+        cmakeContents += "      set(ADDITIONAL_RELEASE_OPTIONS " + self.macReleaseOptions + ")\n"
+    else:
+        cmakeContents += "#     set(ADDITIONAL_RELEASE_OPTIONS " + "\"-Wall\"" + ")\n"
+    cmakeContents += "    endif()\n"
+    cmakeContents += "\n"
+    
+    
+    cmakeContents += "    target_compile_options(${mainExecName} PUBLIC \"$<$<CONFIG:DEBUG>:${ADDITIONAL_DEBUG_OPTIONS}>\")\n"
+    cmakeContents += "    target_compile_options(${mainExecName} PUBLIC \"$<$<CONFIG:RELEASE>:${ADDITIONAL_RELEASE_OPTIONS}>\")\n"
+    
+    cmakeContents += "\n"
+    cmakeContents += "endforeach()   # Loop over targets \n"
+          
+    if(self.verboseFlag): 
+      print(cmakeContents)
+    if(os.path.isfile("CMakeLists.txt")):
+        yesOrNo = input("Overwrite existing CMakeLists.txt ? y)es n)o [n]  :  ")
+        if(yesOrNo != "y"):
+          exit(0)       
+      
+    f = open("CMakeLists.txt", 'w')
+    f.write(cmakeContents)
+    f.close()
+    print("File created : CMakeLists.txt")
+    
+  
+  
+#
+#=========== Local utility routines  ============================
+#   
+
+# Returns the location of the python program that was invoked 
+
+  def get_script_path(self):
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
+   
+  def createFileLinesArray(fileName):
+    dataFile  = Path(fileName)
+    try :
+      f = open(dataFile,'r')
+    except OSError as err:
+      print (' === Error ===')
+      print (" Data file cannot be read")
+      print (err)
+      exit()
+      
+    fileContents =  f.read()
+    f.close()
+
+    fileLines = fileContents.split("\n");
+    return fileLines
+
+
+  def getFragment(self,fileName):
+    dataFile  = Path(self.CMakeCreatorDataDir + "/" + fileName)
+    try :
+      f = open(dataFile,'r')
+    except OSError as err:
+      print (' === Error ===')
+      print (" Data file cannot be read")
+      print (err)
+      exit()
+      
+    fileContents =  f.read()
+    f.close()
+
+    return fileContents
+  
+  def createFragment(self,templateFragmentFile,fragmentData):
+    dataFile  = Path(self.CMakeCreatorDataDir + "/" + templateFragmentFile)
+    try :
+      f = open(dataFile,'r')
+    except IOError as exception:
+        print('                 === Error ===')
+        print(" Template file cannot be read") 
+        print(exception)
+        exit()
+      
+    fragmentContents =  f.read()
+    f.close()
+#
+# Check to make sure all of the parameters that are to be
+# substituted have template entries
+#
+    fragmentKeys = list(fragmentData.keys())
+    for i in range(len(fragmentData)):
+      findString = '$' + fragmentKeys[i]
+      findString = findString.strip()
+      if(fragmentContents.find(findString) == -1): 
+            print('                 === Error ===')
+            print(' Template variable \'' + findString +\
+                '\' is not in the template fragment file')
+            print(' ' + templateFragmentFile)
+            exit()
+#
+# Substitute in the parameters
+#
+    r  = Template(fragmentContents)
+    try:
+      fragmentFile = r.substitute(fragmentData)
+      return fragmentFile
+    except KeyError as exception:
+     print('                 === Error ===')
+     print('A parameter in: ' + rtemplateFragmentFile)
+     print('has not been specified.\n')
+     print('The parameter that needs to be specified :')
+     print('[',exception, ']')
+     exit()
+#   
+#
+#   Stub for executing the class defined in this file 
+#   
+if __name__ == '__main__':
+  cMakeCreator = CMakeCreator()
+  cMakeCreator.run()
+  
+  

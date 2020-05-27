@@ -1,0 +1,12 @@
+# FFTW3 INCLUSION (requires findFFTW3.cmake in CMake modules path) 
+
+if(USE_MKL)
+	find_package(FFTW COMPONENTS fftw MKL REQUIRED)
+else()
+	find_package(FFTW COMPONENTS fftw REQUIRED)
+endif()
+	
+if(USE_FFTW AND FFTW_LIBRARIES)
+	cmake_print_variables(FFTW_INCLUDES)
+	cmake_print_variables(FFTW_LIBRARIES)
+ENDIF()

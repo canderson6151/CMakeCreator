@@ -1,0 +1,12 @@
+#########################################################################
+#   Executable compile features applied to every target
+##########################################################################
+
+    target_compile_features(${mainExecName} PUBLIC cxx_std_11)
+    set_target_properties  (${mainExecName} PROPERTIES CXX_EXTENSIONS OFF)
+#
+#   Executable output properties applied to every target
+#
+    set_target_properties(${mainExecName}  PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/${CMAKE_BUILD_TYPE}" 
+    OUTPUT_NAME "${mainExecName}")

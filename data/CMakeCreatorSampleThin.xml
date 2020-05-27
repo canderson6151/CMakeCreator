@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="no" ?>
+<CMakeCreator_ParameterLists>
+
+<Common>
+
+  <required_cmake       value = "3.15" type = "string" />
+  <project              value = "Project_Name"     />
+
+
+  <IncludeDirs>
+    <dir value = "../Components" />
+  </IncludeDirs>
+
+  <AdditionalDebugOptions>
+    <linuxOption         value = "-Wall" />
+    <linuxOption         value = "-Wno-pessimizing-move" />
+    <visualStudioOption  value = "/W4"   />
+    <macOption           value = "-Wall" />
+    <macOption           value = "-Wno-pessimizing-move" />
+  </AdditionalDebugOptions>
+  
+   <AdditionalReleaseOptions>
+    <linuxOption         value = "" />
+    <visualStudioOption  value = ""   />
+    <macOption           value = "" />
+  </AdditionalReleaseOptions>
+
+  <Library>
+    <libName value = "XML_ParameterList"/>
+    <libDir  value = "../Components/XML_ParameterList"/>
+  </Library>
+
+  <CMakeModulesDir>
+    <dir value = "../Components/cmake_modules" />
+  </CMakeModulesDir> 
+  
+</Common>
+
+<Options>
+  <USE_OPENMP   value = "ON"  />
+  <USE_LAPACK   value = "ON"  />
+  <USE_FFTW     value = "ON"  />
+  <USE_MKL      value = "ON"  />
+  <USE_SQLITE3  value = "ON"  />
+  <USE_MEMCHECK value = "OFF" /> <!-- allows use of ctest -T memcheck --> 
+</Options>
+
+<BuildTargets>
+
+  <Target>
+    <main                   value = "FirstProg.cpp"       />   
+    <additionalSource       value = "Support1.cpp"        />    
+    <additionalIncludeDir   value = "../MoreInclude.h"    />   
+    <ctest                  value = "true" type = "bool"  />    
+    <ctestArguments         value = "-f input.dat"        />    
+    <inputFile              value = "moreInput.dat"       />    
+    <defaultXML             value = "False" type = "bool" />   
+  </Target>
+
+</BuildTargets>
+
+
+</CMakeCreator_ParameterLists>

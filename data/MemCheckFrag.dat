@@ -1,0 +1,5 @@
+# Enable ctest to run memory check (use ctest -T memcheck) 
+
+if(USE_MEMCHECK)
+include (CTest)
+endif() 

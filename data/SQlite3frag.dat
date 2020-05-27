@@ -1,0 +1,5 @@
+# SQLite3 INCLUSION
+ 
+if(USE_SQLITE3)
+find_package(SQLite3)
+endif()

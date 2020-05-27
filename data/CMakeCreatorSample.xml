@@ -1,0 +1,132 @@
+<?xml version="1.0" standalone="no" ?>
+
+<!--                                               -->
+<!-- A sample xml input file for CMakeCreator.py   --> 
+<!--                                               -->
+<!-- Typical usage consists of copying and         -->
+<!-- editing. Edits are often deletions of         -->
+<!-- unnecessary optional parameters.              -->
+<!--                                               -->
+<!-- boolean parameters must include type = "bool" -->
+<!--                                               -->
+<!-- Author: Chris Anderson                        -->
+<!-- Date  : May 20,2020                           -->
+<!--                                               -->
+
+
+<!-- ################################################################### -->
+<!-- #### All directory paths relative to location of CMakeList.txt  ### -->
+<!-- ################################################################### -->
+
+<CMakeCreator_ParameterLists>
+
+<!-- Settings/constructs for all targets --> 
+
+<Common>
+
+  <required_cmake       value = "3.15" type = "string" />
+  <project              value = "Project_Name"     />
+  
+  <!-- Include directories (optional) --> 
+  <!-- Multiple <dir value = ... /> allowed  -->
+
+  <IncludeDirs>
+    <dir value = "../Components" />
+    <dir value = "../PrivateComponents" />
+  </IncludeDirs>
+
+  <!-- Additional compiler options (optional)             --> 
+  <!-- Compiler options are operating systems specific    --> 
+  <!-- Specify multiple options with separate instances.  -->
+
+  <AdditionalDebugOptions>
+    <linuxOption         value = "-Wall" />
+    <visualStudioOption  value = "/W4"   />
+    <macOption           value = "-Wall" />
+  </AdditionalDebugOptions>
+  
+   <AdditionalReleaseOptions>
+    <linuxOption         value = "" />
+    <visualStudioOption  value = ""   />
+    <macOption           value = "" />
+  </AdditionalReleaseOptions>
+  
+ 
+  <!-- Libraries to be built and linked (optional) --> 
+  <!-- Multiple <Library> allowed.               --> 
+
+  <Library>
+    <libName value = "XML_ParameterList"/>
+    <libDir  value = "../Components/XML_ParameterList"/>
+  </Library>
+
+  <Library>
+    <libName value = "MyGraphics"/>
+    <libDir  value = "../PrivateComponents/MyGraphics"/>
+  </Library>
+
+  <!-- Directories containing cmake_module files (optional) -->
+
+  <CMakeModulesDir>
+    <dir value = "../Components/cmake_modules" />
+  </CMakeModulesDir> 
+  
+</Common>
+
+<!-- Currently available options             -->
+<!-- value = "ON" or "OFF"                   -->
+<!-- All options specifications are optional -->
+<!-- <Options> is an optional parameter list --> 
+
+<Options>
+  <USE_OPENMP   value = "ON"  />
+  <USE_LAPACK   value = "ON"  />
+  <USE_FFTW     value = "ON"  />
+  <USE_MKL      value = "ON"  />
+  <USE_SQLITE3  value = "ON"  />
+  <USE_MEMCHECK value = "OFF" /> <!-- allows use of ctest -T memcheck --> 
+</Options>
+
+<!-- Specification of parameters for targets       -->
+<!-- Multiple instances of <Target> allowed.       --> 
+
+<BuildTargets>
+
+  <Target>
+    <main                 value = "FirstProg.cpp"       />  <!-- Source containing main(). (required) --> 
+
+    <additionalSource       value = "Support1.cpp"        />  <!-- Additional sources for target (optional)      --> 
+    <additionalSource       value = "Support2.cpp"        />  <!-- Multiple additionalSource parameters alllowed -->
+
+    <additionalIncludeDir   value = "../MoreInclude.h"    />   <!-- Additional include directores for target (optional) --> 
+    <additionalIncludeDir   value = "../AnotherInclude.h" />   <!-- Multiple additionalIncludeDir parameter allowed     -->
+
+    <ctest                  value = "true" type = "bool"  />   <!-- Enables use of ctest (optional)                             --> 
+    <ctestArguments         value = "-f input.dat"        />   <!-- arguments to ctest command (optional)                       --> 
+
+    <inputFile              value = "moreInput.dat"       />   <!-- Files copied to Testing directory for ctest run (optional)  --> 
+    <inputFile              value = "anInput.dat"         />   <!-- Multiple inputFile parameters allowed                       --> 
+
+    <defaultXML             value = "False" type = "bool" />   <!-- Parameter specifying default XML ctest run (optional)       -->  
+  </Target>
+
+  <Target>
+    <main                   value = "SecondProg.cpp"       />
+
+    <additionalSource       value = "Support3.cpp"         />
+    <additionalSource       value = "Support4.cpp"         />
+
+    <additionalIncludeDir   value = "../MoreInclude2.h"    />
+    <additionalIncludeDir   value = "../AnotherInclude2.h" />
+
+    <ctest                  value = "true" type = "bool"   />
+    <ctestArguments         value = "-f input2.dat"        />    
+    
+    <inputFile              value = "moreInput2.dat"       />
+    <defaultXML             value = "False" type = "bool"  />   
+  </Target>
+
+</BuildTargets>
+
+
+</CMakeCreator_ParameterLists>
