@@ -1,0 +1,24 @@
+
+# Lapack INCLUSION 
+
+# If using MKL installed in a non-default location, 
+# the environment variable MKLROOT must be set
+
+if(USE_LAPACK)
+	if(USE_MKL)
+		set(MKLROOT $ENV{MKLROOT})
+	if (NOT MKLROOT)
+		if (EXISTS "/opt/intel/mkl")
+			set(MKLROOT "/opt/intel/mkl")
+		endif (EXISTS "/opt/intel/mkl")
+	endif (NOT MKLROOT)
+	else ()
+    	set(BLA_VENDOR Generic)
+	endif()
+
+	find_package(BLAS    REQUIRED)
+	find_package(LAPACK  REQUIRED)
+	if(LAPACK_FOUND)
+    	cmake_print_variables(LAPACK_LIBRARIES)
+	ENDIF()
+ENDIF(USE_LAPACK)
