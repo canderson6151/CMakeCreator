@@ -12,11 +12,9 @@
   </IncludeDirs>
 
   <AdditionalDebugOptions>
-    <linuxOption         value = "-Wall" />
-    <linuxOption         value = "-Wno-pessimizing-move" />
+    <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
     <visualStudioOption  value = "/W4"   />
-    <macOption           value = "-Wall" />
-    <macOption           value = "-Wno-pessimizing-move" />
+    <macOption           value = "-Wall,  -Wno-pessimizing-move" />
   </AdditionalDebugOptions>
   
    <AdditionalReleaseOptions>

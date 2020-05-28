@@ -37,17 +37,18 @@
 
   <!-- Additional compiler options (optional)             --> 
   <!-- Compiler options are operating systems specific    --> 
-  <!-- Specify multiple options with separate instances.  -->
+  <!-- Specify multiple options by comma separated string -->
+  <!-- or with separate instances of option type          -->
 
   <AdditionalDebugOptions>
-    <linuxOption         value = "-Wall" />
+    <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
     <visualStudioOption  value = "/W4"   />
-    <macOption           value = "-Wall" />
+    <macOption           value = "-Wall,  -Wno-pessimizing-move" />
   </AdditionalDebugOptions>
   
    <AdditionalReleaseOptions>
     <linuxOption         value = "" />
-    <visualStudioOption  value = ""   />
+    <visualStudioOption  value = "" />
     <macOption           value = "" />
   </AdditionalReleaseOptions>
   

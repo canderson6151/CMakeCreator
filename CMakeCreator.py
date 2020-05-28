@@ -148,13 +148,19 @@ class CMakeCreator(object):
             if(p.tag == "AdditionalDebugOptions"):
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    self.linuxDebugOptions += "\"" + paramList.getValue(q) + "\" "
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.linuxDebugOptions += "\"" + r.strip() + "\" "
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    self.visualStudioDebugOptions += "\"" + paramList.getValue(q) + "\" "
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.visualStudioDebugOptions += "\"" + r.strip() + "\" "
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    self.macDebugOptions += "\"" + paramList.getValue(q) +  "\" "          
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.macDebugOptions += "\"" + r.strip() + "\" "          
      
     self.linuxReleaseOptions         = ""
     self.visualStudioReleaseOptions  = ""
@@ -165,18 +171,24 @@ class CMakeCreator(object):
             if(p.tag == "AdditionalReleaseOptions"):
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    self.linuxReleaseOptions += "\"" + paramList.getValue(q) + "\" "
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.linuxReleaseOptions += "\"" + r.strip() + "\" "
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    self.visualStudioReleaseOptions += "\"" + paramList.getValue(q) + "\" "
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.visualStudioReleaseOptions += "\"" + r.strip() + "\" "
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    self.macReleaseOptions += "\"" + paramList.getValue(q) +  "\" "  
-     
+                    optionSplit = q.get("value",None).split(",")
+                    for r in optionSplit :
+                      self.macReleaseOptions += "\"" + r.strip() + "\" "       
     #                                 
     # Specify cmake modules directory paths
     #
     
+    CMakeModulesDirSet = False
     if(commonList != None):
         for p in commonList:
             if(p.tag == "CMakeModulesDir"):
@@ -188,6 +200,7 @@ class CMakeCreator(object):
                 directories = p.findall("dir")
                 for q in directories:
                     cmakeContents += "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/" + paramList.getValue(q) + "\")\n"
+                    CMakeModulesDirSet = True
     
     #
     #################################################################
@@ -247,7 +260,11 @@ class CMakeCreator(object):
             cmakeContents += self.getFragment("OpenMPfrag.dat")
         if((p == "USE_FFTW")):
             cmakeContents += "\n"
-            cmakeContents += self.getFragment("FFTWfrag.dat")           
+            cmakeContents += self.getFragment("FFTWfrag.dat")
+            if(not CMakeModulesDirSet) :
+                print("Warning : cmake_modules directory path containing FindFFTW.cmake not set. ")
+                print("          Add CMakeModulesDir parameter specifying cmake_modules path  ")
+                print("          or remove option USE_FFTW. ")       
         if((p == "USE_SQLITE3")):
             cmakeContents += "\n"
             cmakeContents += self.getFragment("SQlite3frag.dat") 
@@ -271,10 +288,10 @@ class CMakeCreator(object):
     if(ctestingFlag) :
         cmakeContents += "\n"
         cmakeContents += "#\n"
-        cmakeContents += "# Enable testing \n"
+        cmakeContents += "# Enable testing and create directories for testing \n"
         cmakeContents += "#\n"
         cmakeContents += "\n"  
-        cmakeContents += "enable_testing()\n"
+        cmakeContents += "enable_testing()\n\n"
         
     #################################################################
     #################################################################
@@ -286,15 +303,11 @@ class CMakeCreator(object):
     targetParams = paramList.getParameterList("BuildTargets")
     
     # 
-    #    Create a list of main sources 
+    #  Create a list of main sources and directories for testing
+    # output
     #
     
-    
-    cmakeContents += "\n"
-    cmakeContents += "#####################################################\n"
-    cmakeContents += "# Specify list of target sources containing \"main\"  \n"
-    cmakeContents += "#####################################################\n"
-    
+
     Main_Sources = ""
     
     ctestingFlag    = False
@@ -311,12 +324,19 @@ class CMakeCreator(object):
         ctestFlagParam = p.find("ctest")
         if(ctestFlagParam != None) : 
             ctestFlag = paramList.getValue(ctestFlagParam)
-            if(ctestFlag) : ctestingFlag = True 
+            if(ctestFlag) : 
+                ctestingFlag = True 
+                cmakeContents += "file(MAKE_DIRECTORY \"${CMAKE_SOURCE_DIR}/Testing/" + mainSource.split(".")[0] + "\")\n"
+                
+        
+    cmakeContents += "\n"
+    cmakeContents += "#####################################################\n"
+    cmakeContents += "# Specify list of target sources containing \"main\"  \n"
+    cmakeContents += "#####################################################\n"
+           
 
     cmakeContents += "\n"
     cmakeContents += "set(Main_Sources " + Main_Sources + ")\n"
-  
-
 
 
     #
@@ -415,13 +435,13 @@ class CMakeCreator(object):
                 cmakeContents +=  "\n"
                 cmakeContents +=  "#      --- Commands for ctest setup ---  \n"
 
-                cmakeContents +=  "\n"
-                cmakeContents +=  "#     Command to induce the creation of Testing/"+ mainSource.split(".")[0]  + " directory \n"
+                #cmakeContents +=  "\n"
+                #cmakeContents +=  "#     Command to induce the creation of Testing/"+ mainSource.split(".")[0]  + " directory \n"
                 
                 
-                cmakeContents += "\n"
-                cmakeContents += "      add_custom_target(\"createTestOutputDir_${mainExecName}\" ALL \n"
-                cmakeContents += "      COMMAND ${CMAKE_COMMAND} -E make_directory \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\")\n"
+                #cmakeContents += "\n"
+                #cmakeContents += "      add_custom_target(\"createTestOutputDir_${mainExecName}\" ALL \n"
+                #cmakeContents += "      COMMAND ${CMAKE_COMMAND} -E make_directory \"${CMAKE_SOURCE_DIR}/Testing/${mainExecName}\")\n"
                 
                 inputFilesParam = p.findall("inputFile")
                 for q in inputFilesParam :
