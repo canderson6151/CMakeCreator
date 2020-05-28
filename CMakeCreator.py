@@ -3,11 +3,21 @@ import sys
 import argparse
 import subprocess
 from datetime import datetime
-from pathlib import Path
+
 
 from XML_ParameterListArray import XML_ParameterListArray
 from string import Template
 
+
+import sys
+try:
+    from pathlib  import Path
+except Exception as e:
+    print("")
+    print ("XXX               Error                 XXXX") 
+    print ("XXX CMakeCreator requires Python >= 3.4 XXXX")
+    print ("XXX                                     XXXX") 
+    exit(1)
 
         
 class CMakeCreator(object):
