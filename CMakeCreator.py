@@ -34,16 +34,18 @@ class CMakeCreator(object):
     
         self.linuxReleaseOptions           = None
         self.visualStudioReleaseOptions    = None
-        self.macReleaseOptions             = None      
+        self.macReleaseOptions             = None 
+        self.forceOverwriteFlag            = False     
 
         
   def parseOptions(self):
       parser = argparse.ArgumentParser()
-      parser.add_argument('--xmldatafile',"-x",dest='xmldatafile',default=None, help="Specify xml file containing CMakeList.txt construction data")
-      parser.add_argument('--samplefile',"-s",action='store_true', dest='samplefileFlag', help="Creates sample input *.xml file")
-      parser.add_argument('--basicSamplefile',"-b",action='store_true', dest='basicSamplefileFlag', help="Creates sample input *.xml file with minimal commenting.")
+      parser.add_argument('--xmldatafile',"-x",dest='xmldatafile',default=None, help="Specify XML file containing CMakeLists.txt construction data")
+      parser.add_argument('--samplefile',"-s",action='store_true', dest='samplefileFlag', help="Creates sample XML input file with verbose commenting")
+      parser.add_argument('--basicSamplefile',"-b",action='store_true', dest='basicSamplefileFlag', help="Creates sample XML input file with minimal commenting.")
       parser.add_argument('--verbose',"-v",action='store_true', dest='verboseFlag', help="Output to screen and CMakeLists.txt file")
-    
+      parser.add_argument('--force',"-f",action='store_true', dest='forceFlag', help="Force automatic overwrite of existing CMakeLists.txt file")
+
       args = parser.parse_args()
       if(args.samplefileFlag):
         sampleFile = Path(self.get_script_path())/"data"/"CMakeCreatorSample.xml"
@@ -81,6 +83,7 @@ class CMakeCreator(object):
           exit()
       self.CMakeListDataFile   = args.xmldatafile
       self.verboseFlag         = args.verboseFlag
+      self.forceOverwriteFlag  = args.forceFlag;
       
     
   def run(self): 
@@ -552,7 +555,7 @@ class CMakeCreator(object):
           
     if(self.verboseFlag): 
       print(cmakeContents)
-    if(os.path.isfile("CMakeLists.txt")):
+    if(os.path.isfile("CMakeLists.txt") and (not self.forceOverwriteFlag)):
         yesOrNo = input("Overwrite existing CMakeLists.txt ? y)es n)o [n]  :  ")
         if(yesOrNo != "y"):
           exit(0)       
