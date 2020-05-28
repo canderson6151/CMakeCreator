@@ -409,8 +409,10 @@ class CMakeCreator(object):
                     cmakeContents += "         target_link_libraries(${mainExecName} PUBLIC OpenMP::OpenMP_CXX)\n"
                     cmakeContents += "      endif()\n"
                 if((q == "USE_FFTW") and (val == "ON")):
-                    if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
-                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"         
+                    #if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
+                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
+                    cmakeContents += "      target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
+                        
                 if((q == "USE_SQLITE3") and (val == "ON")):
                     cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${SQLite3_LIBRARIES})\n"
                     cmakeContents += "      target_include_directories(${mainExecName} PUBLIC  ${SQLite3_INCLUDE_DIRS})\n"
