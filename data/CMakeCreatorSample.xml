@@ -1,5 +1,4 @@
-<?xml version="1.0" standalone="no" ?>
-
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!--                                               -->
 <!-- A sample xml input file for CMakeCreator.py   --> 
 <!--                                               -->
@@ -39,7 +38,7 @@
   <!-- Compiler options are operating systems specific    --> 
   <!-- Specify multiple options by comma separated string -->
   <!-- or with separate instances of option type          -->
-
+ 
   <AdditionalDebugOptions>
     <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
     <visualStudioOption  value = "/W4"   />
@@ -63,11 +62,13 @@
 
   <Library>
     <libName value = "MyGraphics"/>
-    <libDir  value = "../PrivateComponents/MyGraphics"/>
+    <libDir  value = "../OtherComponents/MyGraphics"/>
   </Library>
 
-  <!-- Directories containing cmake_module files (optional) -->
-
+  <!-- Specification of cmake_modules directory that -->
+  <!-- contains the file FindFFTW.cmake              -->
+  <!-- Required when including option USE_FFTW       -->
+  
   <CMakeModulesDir>
     <dir value = "../Components/cmake_modules" />
   </CMakeModulesDir> 
@@ -94,37 +95,37 @@
 <BuildTargets>
 
   <Target>
-    <main                 value = "FirstProg.cpp"       />  <!-- Source containing main(). (required) --> 
+    <main                  value = "FirstProg.cpp"       />  <!-- Source containing main(). (required) --> 
+    
+    <additionalSource      value = "SupportA.cpp"        />  <!-- Additional sources for target (optional)      --> 
+    <additionalSource      value = "SupportB.cpp"        />  <!-- Multiple additionalSource parameters alllowed -->
+    
+    <additionalIncludeDir  value = "../Include_A.h"      />   <!-- Additional include directores for target (optional) --> 
+    <additionalIncludeDir  value = "../Include_B.h"      />   <!-- Multiple additionalIncludeDir parameter allowed     -->
+    
+    <ctest                 value = "true" type = "bool"  />   <!-- Enables use of ctest (optional)                             --> 
+    <ctestArguments        value = "-f input1.dat"       />   <!-- arguments to ctest command (optional)                       --> 
+    
+    <inputFile             value = "input1.dat"          />   <!-- Files copied to Testing directory for ctest run (optional)  --> 
+    <inputFile             value = "dataFile1.dat"       />   <!-- Multiple inputFile parameters allowed                       --> 
 
-    <additionalSource       value = "Support1.cpp"        />  <!-- Additional sources for target (optional)      --> 
-    <additionalSource       value = "Support2.cpp"        />  <!-- Multiple additionalSource parameters alllowed -->
-
-    <additionalIncludeDir   value = "../MoreInclude.h"    />   <!-- Additional include directores for target (optional) --> 
-    <additionalIncludeDir   value = "../AnotherInclude.h" />   <!-- Multiple additionalIncludeDir parameter allowed     -->
-
-    <ctest                  value = "true" type = "bool"  />   <!-- Enables use of ctest (optional)                             --> 
-    <ctestArguments         value = "-f input.dat"        />   <!-- arguments to ctest command (optional)                       --> 
-
-    <inputFile              value = "moreInput.dat"       />   <!-- Files copied to Testing directory for ctest run (optional)  --> 
-    <inputFile              value = "anInput.dat"         />   <!-- Multiple inputFile parameters allowed                       --> 
-
-    <defaultXML             value = "False" type = "bool" />   <!-- Parameter specifying default XML ctest run (optional)       -->  
+    <defaultXML            value = "False" type = "bool" />   <!-- Parameter specifying default XML ctest run (optional)       -->  
   </Target>
 
   <Target>
-    <main                   value = "SecondProg.cpp"       />
+    <main                   value = "SecondProg.cpp"      />
 
-    <additionalSource       value = "Support3.cpp"         />
-    <additionalSource       value = "Support4.cpp"         />
+    <additionalSource       value = "SupportC.cpp"        />
+    <additionalSource       value = "SupportD.cpp"        />
 
-    <additionalIncludeDir   value = "../MoreInclude2.h"    />
-    <additionalIncludeDir   value = "../AnotherInclude2.h" />
+    <additionalIncludeDir   value = "../IncludeC.h"       />
+    <additionalIncludeDir   value = "../IncludeD.h"       />
 
-    <ctest                  value = "true" type = "bool"   />
-    <ctestArguments         value = "-f input2.dat"        />    
+    <ctest                  value = "true" type = "bool"  />
+    <ctestArguments         value = "-f input2.dat"       />    
     
-    <inputFile              value = "moreInput2.dat"       />
-    <defaultXML             value = "False" type = "bool"  />   
+    <inputFile              value = "input2.dat"          />
+    <defaultXML             value = "False" type = "bool" />   
   </Target>
 
 </BuildTargets>
