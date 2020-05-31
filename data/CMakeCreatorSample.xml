@@ -39,12 +39,12 @@
   <!-- Specify multiple options by comma separated string      -->
   <!-- or with separate instances of option type               -->
   <!-- If options have quotes, then specify using non value =  -->
-  <!-- specification. 
+  <!-- specification.                                          -->
  
   <AdditionalDebugOptions>
     <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
     <visualStudioOption  value = "/W4"   />
-    <visualStudioOption> /wd"4458""</visualStudioOption/>
+    <visualStudioOption> /wd"4458" </visualStudioOption>
     <macOption           value = "-Wall,  -Wno-pessimizing-move" />
   </AdditionalDebugOptions>
   
