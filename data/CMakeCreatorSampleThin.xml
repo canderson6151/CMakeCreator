@@ -14,6 +14,7 @@
   <AdditionalDebugOptions>
     <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
     <visualStudioOption  value = "/W4"   />
+    <visualStudioOption> /wd"4458""  </visualStudioOption/>
     <macOption           value = "-Wall,  -Wno-pessimizing-move" />
   </AdditionalDebugOptions>
   

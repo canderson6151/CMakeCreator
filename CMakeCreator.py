@@ -151,19 +151,36 @@ class CMakeCreator(object):
             if(p.tag == "AdditionalDebugOptions"):
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
                       self.linuxDebugOptions += "\"" + r.strip() + "\" "
+                    
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.linuxDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
+                
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
                       self.visualStudioDebugOptions += "\"" + r.strip() + "\" "
+                      
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.visualStudioDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
+                        
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
-                      self.macDebugOptions += "\"" + r.strip() + "\" "          
+                      self.macDebugOptions += "\"" + r.strip() + "\" "
+                      
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.macDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "          
      
     self.linuxReleaseOptions         = ""
     self.visualStudioReleaseOptions  = ""
@@ -174,19 +191,36 @@ class CMakeCreator(object):
             if(p.tag == "AdditionalReleaseOptions"):
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
                       self.linuxReleaseOptions += "\"" + r.strip() + "\" "
+                      
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.linuxReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "   
+
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
                       self.visualStudioReleaseOptions += "\"" + r.strip() + "\" "
+                      
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.visualStudioReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "                       
+                      
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = q.get("value",None).split(",")
+                    optionSplit = q.get("value","").split(",")
                     for r in optionSplit :
-                      self.macReleaseOptions += "\"" + r.strip() + "\" "       
+                      self.macReleaseOptions += "\"" + r.strip() + "\" " 
+                    
+                    if(q.text != None) :  
+                      optionSplit = q.text.split(",")
+                      for r in optionSplit :
+                        self.macReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "       
     #                                 
     # Specify cmake modules directory paths
     #
