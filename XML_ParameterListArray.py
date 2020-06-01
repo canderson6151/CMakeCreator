@@ -4,6 +4,7 @@ import os
 from copy import deepcopy
 
 import xml.etree.ElementTree as ET
+
 TRUE_VALS  = ( '1', 'true',  'True', 'TRUE',  'y', 'yes', 'Y', 'Yes', 'YES' )
 FALSE_VALS = ( '0', 'false', 'False', 'FALSE','n', 'no',  'N', 'No',   'NO' )
 
@@ -55,6 +56,17 @@ class XML_ParameterListArray:
                              + "\n Parameter    : " + parameterName)
 
         return self.getValue(instance)
+    
+    def getParameterText(self,parameterName, parameterListName):
+        parameterList = self.tree.find(parameterListName)
+        if(parameterList == None):
+            raise Exception("\n ParameterList not found \n ParameterList specified  : " + parameterListName)
+        instance = parameterList.find(parameterName)
+        if(instance == None):
+            raise Exception("\n Parameter not found in ParameterList \n ParmeterList : " + parameterListName \
+                             + "\n Parameter    : " + parameterName)
+
+        return instance.text.strip()
 
     def getParameterValueOrDefault(self,parameterName, parameterListName,defaultValue):
         parameterList = self.tree.find(parameterListName)
@@ -91,6 +103,13 @@ class XML_ParameterListArray:
     
     def getParameterList(self,parameterListName):
         parameterList = self.tree.find(parameterListName)
+        if(parameterList == None):
+            raise Exception("\n ParameterList not found \n ParameterList specified  : " + parameterListName)
+        
+        return parameterList
+        
+    def getParameterListAll(self, parameterListName):
+        parameterList = self.tree.findall(parameterListName)
         if(parameterList == None):
             raise Exception("\n ParameterList not found \n ParameterList specified  : " + parameterListName)
         
@@ -259,6 +278,42 @@ class XML_ParameterListArray:
                 return "bool"
             return "string"    
     
+    def hasValueSpecified(self,paramElement):
+        strVal  = paramElement.get("value",None)
+        if(strVal == None): return False
+        return True
+    
+    def getTextSpecification(self,paramElement):
+        valType = paramElement.get('type',None)
+        strVal  = paramElement.text
+        if(strVal == None):
+            raise ValueError("value attribute not specified in ",paramElement)
+        
+        if(valType != None) : 
+            try:
+                if(valType == "string"): return strVal
+                if(valType == "float") : return float(strVal)
+                if(valType == "double"): return float(strVal)
+                if(valType == "int")   : return int(strVal)
+                if(valType == "long")  : return int(strVal)
+                if(valType == "bool")  : 
+                    if(strVal in TRUE_VALS) : return True
+                    if(strVal in FALSE_VALS): return False
+            except:
+                raise ValueError("type inconsistent with value specified or type un-supported",\
+                                 paramElement).with_traceback(sys.exc_info()[2])
+        
+        try:
+            float(strVal)
+            if(strVal.find(".") >= 0) : return float(strVal) 
+            else:                       return int(strVal)
+        except ValueError:
+            if(strVal in TRUE_VALS):
+                return True 
+            if(strVal in FALSE_VALS) : 
+                return False 
+            return strVal 
+
     def getValue(self,paramElement):
         valType = paramElement.get('type',None)
         strVal  = paramElement.get("value",None)
