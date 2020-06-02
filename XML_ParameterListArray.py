@@ -67,6 +67,17 @@ class XML_ParameterListArray:
                              + "\n Parameter    : " + parameterName)
 
         return instance.text.strip()
+      
+    def getParameterAll(self,parameterName, parameterListName):
+        parameterList = self.tree.find(parameterListName)
+        if(parameterList == None):
+            raise Exception("\n ParameterList not found \n ParameterList specified  : " + parameterListName)
+        parameters = parameterList.findall(parameterName)
+        if(parameters == None):
+            raise Exception("\n Parameter not found in ParameterList \n ParmeterList : " + parameterListName \
+                             + "\n Parameter    : " + parameterName)
+
+        return parameters
 
     def getParameterValueOrDefault(self,parameterName, parameterListName,defaultValue):
         parameterList = self.tree.find(parameterListName)
