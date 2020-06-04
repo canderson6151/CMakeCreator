@@ -19,6 +19,30 @@ except Exception as e:
     print ("XXX                                     XXXX") 
     exit(1)
 
+#
+# A python program that constructs a CMakeLists.txt file by 
+# combining information contained within an input XML data file
+# and code snippets contained in the /data subdirectory. 
+#
+# Typical invocation 
+#
+# python3 -m CMakeCreator -x <inputFile.xml> 
+#
+# To obtain a sample XML data file that's heavily annotated use the command 
+#
+# python -m CMakeCreator -s
+#
+# To obtain a sample XML data file that's minimally annotated, use the command
+#
+# python -m CMakeCreator -b 
+#
+# 
+# Changes to the default values used to create CMakeLists.txt files can
+# be implemented by modifying the contents of the CMake code snippets stored 
+# in the /data subdirectory. 
+#
+# Chris Anderson : June, 3, 2020 
+#
         
 class CMakeCreator(object):
   
@@ -313,7 +337,10 @@ class CMakeCreator(object):
 
     # Enable testing if specified in any of the targets
     
-    targetParams = paramList.getParameterList("BuildTargets")
+    targetParamsTemp = paramList.getParameterList("BuildTargets")
+    targetParams = []
+    for p in targetParamsTemp:
+      if(p.tag == "Target") : targetParams.append(p)
         
     ctestingFlag    = False
     for p in targetParams:
@@ -337,7 +364,10 @@ class CMakeCreator(object):
     #################################################################
     
     
-    targetParams = paramList.getParameterList("BuildTargets")
+    targetParamsTemp = paramList.getParameterList("BuildTargets")
+    targetParams = []
+    for p in targetParamsTemp:
+      if(p.tag == "Target") : targetParams.append(p)
     
     # 
     #  Create a list of main sources and directories for testing
