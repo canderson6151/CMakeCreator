@@ -51,6 +51,7 @@ class CMakeCreator(object):
         self.CMakeListDataFile   = None
         self.localDirectory      = os.getcwd()
         self.verboseFlag         = False
+        self.timeStampFlag       = True
         
         self.linuxDebugOptions            = None
         self.visualStudioDebugOptions     = None
@@ -69,7 +70,8 @@ class CMakeCreator(object):
       parser.add_argument('--basicSamplefile',"-b",action='store_true', dest='basicSamplefileFlag', help="Creates sample XML input file with minimal commenting.")
       parser.add_argument('--verbose',"-v",action='store_true', dest='verboseFlag', help="Output to screen and CMakeLists.txt file")
       parser.add_argument('--force',"-f",action='store_true', dest='forceFlag', help="Force automatic overwrite of existing CMakeLists.txt file")
-
+      parser.add_argument('--notimestamp',"-n",action='store_true', dest='noStampFlag', help="Don't add timestamp to CMakeLists.txt file")
+      
       args = parser.parse_args()
       if(args.samplefileFlag):
         sampleFile = Path(self.get_script_path())/"data"/"CMakeCreatorSample.xml"
@@ -107,10 +109,13 @@ class CMakeCreator(object):
           exit()
       self.CMakeListDataFile   = args.xmldatafile
       self.verboseFlag         = args.verboseFlag
-      self.forceOverwriteFlag  = args.forceFlag;
+      self.forceOverwriteFlag  = args.forceFlag
+      if(args.noStampFlag) : 
+        self.timeStampFlag = False
       
     
   def run(self): 
+    
     print ("Running CMakeCreator")
     self.CMakeCreatorDataDir = self.get_script_path() + "/data"
     
@@ -119,16 +124,19 @@ class CMakeCreator(object):
       print("Desired file containing CMakeLists data specified with -x option ")
       sys.exit(1)
 
+          
     paramList = XML_ParameterListArray(self.CMakeListDataFile)
     
     fragmentFile = "CMakeBaseFrag.tpl"
     fragmentData = {}
-    fragmentData["required_cmake"]     = paramList.getParameterValue("required_cmake","Common")
-    fragmentData["project"]            = paramList.getParameterValue("project","Common")
+    fragmentData["required_cmake"]      = paramList.getParameterValue("required_cmake","Common")
+    fragmentData["project"]             = paramList.getParameterValue("project","Common")
     fragmentData["XML_InputFile"]       = self.CMakeListDataFile
-    fragmentData["Date"]               =  '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.now())
-
-
+    
+    if(self.timeStampFlag):
+      fragmentData["Date"]              =  '{0:%Y-%m-%d }'.format(datetime.now())
+    else:
+     fragmentData["Date"]               =  ""
     #################################################################
     #################################################################
     #                  Common settings
