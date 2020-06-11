@@ -8,6 +8,7 @@
 
 cmake_minimum_required (VERSION $required_cmake)
 project ($project)
+
 message(STATUS "System Name $${CMAKE_SYSTEM_NAME}")
 
 # Loads helper to print messages

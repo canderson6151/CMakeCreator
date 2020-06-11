@@ -5,8 +5,8 @@ from copy import deepcopy
 
 import xml.etree.ElementTree as ET
 
-TRUE_VALS  = ( '1', 'true',  'True', 'TRUE',  'y', 'yes', 'Y', 'Yes', 'YES' )
-FALSE_VALS = ( '0', 'false', 'False', 'FALSE','n', 'no',  'N', 'No',   'NO' )
+TRUE_VALS  = ( '1', 'true',  'True', 'TRUE',  'y', 'yes', 'Y', 'Yes', 'YES','ON',"on","On")
+FALSE_VALS = ( '0', 'false', 'False', 'FALSE','n', 'no',  'N', 'No',   'NO',"OFF","off","Off")
 
 class XML_ParameterListArray:
     def __init__(self,fileName = None):
@@ -56,6 +56,17 @@ class XML_ParameterListArray:
                              + "\n Parameter    : " + parameterName)
 
         return self.getValue(instance)
+    
+    def getParameterValueOrText(self,parameterName, parameterListName):
+        parameterList = self.tree.find(parameterListName)
+        if(parameterList == None):
+            raise Exception("\n ParameterList not found \n ParameterList specified  : " + parameterListName)
+        instance = parameterList.find(parameterName)
+        if(instance == None):
+            raise Exception("\n Parameter not found in ParameterList \n ParmeterList : " + parameterListName \
+                             + "\n Parameter    : " + parameterName)
+
+        return self.getValueOrText(instance)
     
     def getParameterText(self,parameterName, parameterListName):
         parameterList = self.tree.find(parameterListName)
@@ -325,6 +336,15 @@ class XML_ParameterListArray:
                 return False 
             return strVal 
 
+    def getValueOrText(selfself,paramElement):
+        val = paramElement.get('value',None)
+        if(val == None):
+            if(paramElement.text != None):
+               return paramElement.text.strip()
+        else:
+            return paramElement.get("value",None) 
+ 
+           
     def getValue(self,paramElement):
         valType = paramElement.get('type',None)
         strVal  = paramElement.get("value",None)

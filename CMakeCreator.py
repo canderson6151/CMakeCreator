@@ -5,9 +5,9 @@ import subprocess
 from datetime import datetime
 
 
+
 from XML_ParameterListArray import XML_ParameterListArray
 from string import Template
-
 
 import sys
 try:
@@ -129,8 +129,8 @@ class CMakeCreator(object):
     
     fragmentFile = "CMakeBaseFrag.tpl"
     fragmentData = {}
-    fragmentData["required_cmake"]      = paramList.getParameterValue("required_cmake","Common")
-    fragmentData["project"]             = paramList.getParameterValue("project","Common")
+    fragmentData["required_cmake"]      = paramList.getParameterValueOrText("required_cmake","Common")
+    fragmentData["project"]             = paramList.getParameterValueOrText("project","Common")
     fragmentData["XML_InputFile"]       = self.CMakeListDataFile
     
     if(self.timeStampFlag):
@@ -181,38 +181,26 @@ class CMakeCreator(object):
     if(commonList != None):
         for p in commonList:
             if(p.tag == "AdditionalDebugOptions"):
+                optionValues = None
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.linuxDebugOptions += "\"" + r.strip() + "\" "
-                    
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.linuxDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
+                      self.linuxDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                 
+                optionValues = None
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.visualStudioDebugOptions += "\"" + r.strip() + "\" "
+                      self.visualStudioDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                       
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.visualStudioDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
-                        
+                optionValues = None       
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.macDebugOptions += "\"" + r.strip() + "\" "
-                      
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.macDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "          
+                      self.macDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "       
      
     self.linuxReleaseOptions         = ""
     self.visualStudioReleaseOptions  = ""
@@ -221,38 +209,27 @@ class CMakeCreator(object):
     if(commonList != None):
         for p in commonList:
             if(p.tag == "AdditionalReleaseOptions"):
+                optionValues = None
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.linuxReleaseOptions += "\"" + r.strip() + "\" "
-                      
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.linuxReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "   
-
+                      self.linuxReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
+                    
+                optionValues = None
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.visualStudioReleaseOptions += "\"" + r.strip() + "\" "
+                      self.visualStudioReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                       
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.visualStudioReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "                       
-                      
+                optionValues = None      
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = q.get("value","").split(",")
+                    optionSplit = paramList.getValueOrText(q).split(",") 
                     for r in optionSplit :
-                      self.macReleaseOptions += "\"" + r.strip() + "\" " 
-                    
-                    if(q.text != None) :  
-                      optionSplit = q.text.split(",")
-                      for r in optionSplit :
-                        self.macReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "       
+                      self.macReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
+                           
     #                                 
     # Specify cmake modules directory paths
     #
@@ -279,6 +256,7 @@ class CMakeCreator(object):
     
     externalLibraryFlag = False
     libraryCount        = 0
+    toggleVal           = "OFF"
     if(commonList != None):
         for p in commonList:
             if(p.tag == "Library"): 
@@ -294,9 +272,9 @@ class CMakeCreator(object):
                 cmakeContents += "\n"
                 libDir  = p.find("libDir")
                 libName = p.find("libName")
-                cmakeContents += "add_subdirectory(\"${CMAKE_SOURCE_DIR}/" + paramList.getValue(libDir) + "\" "
-                cmakeContents += "\"${CMAKE_SOURCE_DIR}/" + paramList.getValue(libDir) + "/build\")\n"
-                cmakeContents +=  "list(APPEND ExternalLibs \"" + paramList.getValue(libName) +  "\")\n"
+                cmakeContents += "add_subdirectory(\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "\" "
+                cmakeContents += "\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "/build\")\n"
+                cmakeContents +=  "list(APPEND ExternalLibs \"" + paramList.getValueOrText(libName) +  "\")\n"
       
     OptionNames = []
     if(paramList.isParameterList("Options")):
@@ -314,12 +292,13 @@ class CMakeCreator(object):
         cmakeContents += "#\n"
 
     for p in OptionNames :
-        val = paramList.getParameterValue(p,"Options")
-        cmakeContents += "\nOPTION(" + p + "  \"Option " + p + "\"  " + val + ")" 
+        val = str(paramList.getParameterValueOrText(p,"Options")).strip()
+        if(val in self.TRUE_VALS) : toggleVal = "ON"
+        if(val in self.FALSE_VALS): toggleVal = "OFF"
+        cmakeContents += "\nOPTION(" + p + "  \"Option " + p + "\"  " + toggleVal + ")" 
     
     lapackFlag = False
     for p in OptionNames :
-        val = paramList.getParameterValue(p,"Options")
         if((p == "USE_LAPACK")):
             cmakeContents += "\n"
             cmakeContents += self.getFragment("LapackFrag.dat")
@@ -354,8 +333,9 @@ class CMakeCreator(object):
     for p in targetParams:
         ctestFlagParam = p.find("ctest")
         if(ctestFlagParam != None) : 
-            ctestFlag = paramList.getValue(ctestFlagParam)
-            if(ctestFlag) : ctestingFlag = True 
+            ctestingFlag = False
+            ctestingFlag = (str(paramList.getValueOrText(ctestFlagParam)) in self.TRUE_VALS)
+            
 
     if(ctestingFlag) :
         cmakeContents += "\n"
@@ -393,12 +373,13 @@ class CMakeCreator(object):
         if(mainParam == None):
             raise Exception("\nError:  <main = ... > parameter specifying main source\n        not specified in <Target>  \n ")
             
-        mainSource     = paramList.getValue(mainParam)
+        mainSource     = paramList.getValueOrText(mainParam)
         Main_Sources   += "\"" + mainSource + "\" "
         
         ctestFlagParam = p.find("ctest")
         if(ctestFlagParam != None) : 
-            ctestFlag = paramList.getValue(ctestFlagParam)
+            ctestFlag = False
+            ctestFlag = (str(paramList.getValueOrText(ctestFlagParam)) in self.TRUE_VALS)
             if(ctestFlag) : 
                 ctestingFlag = True 
                 cmakeContents += "file(MAKE_DIRECTORY \"${CMAKE_SOURCE_DIR}/Testing/" + mainSource.split(".")[0] + "\")\n"
@@ -447,7 +428,7 @@ class CMakeCreator(object):
             if(mainParam == None):
                 raise Exception("\nError:  <main = ... > parameter specifying main source\n        not specified in <Target>  \n ")
             
-            mainSource      = paramList.getValue(mainParam)
+            mainSource      = paramList.getValueOrText(mainParam)
             sourceFileList += "\"" + mainSource + "\" "
             
             additionalSourceParam = p.findall("additionalSource")
@@ -473,21 +454,29 @@ class CMakeCreator(object):
     
             
             for q in OptionNames :
-                val = paramList.getParameterValue(q,"Options")
-                if((q == "USE_LAPACK") and (val == "ON")):
-                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
-                if((q == "USE_OPENMP") and (val == "ON")):
+                
+                if((q == "USE_LAPACK")):
+                    cmakeContents += "      if(USE_LAPACK) \n"
+                    cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
+                    cmakeContents += "      endif()\n\n"                    
+                    
+                if((q == "USE_OPENMP")):
                     cmakeContents += "      if(OpenMP_CXX_FOUND) \n"
                     cmakeContents += "         target_link_libraries(${mainExecName} PUBLIC OpenMP::OpenMP_CXX)\n"
-                    cmakeContents += "      endif()\n"
-                if((q == "USE_FFTW") and (val == "ON")):
+                    cmakeContents += "      endif()\n\n"
+                    
+                if((q == "USE_FFTW")):
                     #if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
-                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
-                    cmakeContents += "      target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
+                    cmakeContents += "      if(USE_FFTW) \n"
+                    cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
+                    cmakeContents += "          target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
+                    cmakeContents += "      endif()\n\n"
                         
-                if((q == "USE_SQLITE3") and (val == "ON")):
-                    cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${SQLite3_LIBRARIES})\n"
-                    cmakeContents += "      target_include_directories(${mainExecName} PUBLIC  ${SQLite3_INCLUDE_DIRS})\n"
+                if((q == "USE_SQLITE3")):
+                    cmakeContents += "      if(USE_SQLITE3) \n"
+                    cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${SQLite3_LIBRARIES})\n"
+                    cmakeContents += "          target_include_directories(${mainExecName} PUBLIC  ${SQLite3_INCLUDE_DIRS})\n"
+                    cmakeContents += "      endif()\n\n"
                       
             if(externalLibraryFlag):
                 cmakeContents += "\n"
@@ -505,7 +494,9 @@ class CMakeCreator(object):
                 
             ctestFlagParam = p.find("ctest")
             if(ctestFlagParam != None) : 
-                ctestFlag = paramList.getValue(ctestFlagParam) 
+                ctestFlag = False
+                ctestFlag = (str(paramList.getValueOrText(ctestFlagParam)) in self.TRUE_VALS)
+                 
             
             if(ctestFlag):
                 
@@ -522,7 +513,7 @@ class CMakeCreator(object):
                 
                 inputFilesParam = p.findall("inputFile")
                 for q in inputFilesParam :
-                    inputFiles.append(paramList.getValue(q))
+                    inputFiles.append(paramList.getValueOrText(q))
                 if(len(inputFiles) != 0) : 
                     cmakeContents += "\n"
                     cmakeContents +=  "#     Copy test input files to Testing/"+ mainSource.split(".")[0]  + " \n\n"
@@ -533,7 +524,8 @@ class CMakeCreator(object):
                 
                 defaultXMLParam = p.find("defaultXML")
                 if(defaultXMLParam != None) :
-                  defaultXML = paramList.getValue(defaultXMLParam)
+                  defaultXML = False
+                  defaultXML = (str(paramList.getValueOrText(defaultXMLParam)) in self.TRUE_VALS)
                   
                 if(defaultXML):
                     cmakeContents += "\n"
@@ -547,7 +539,7 @@ class CMakeCreator(object):
                       cmakeContents += "\n"
                       cmakeContents +=  "#     Specify command line arguments  \n"
                     
-                      ctestArguments = paramList.getValue(ctestArgumentsParam)  
+                      ctestArguments = paramList.getValueOrText(ctestArgumentsParam)  
                       cmakeContents += "\n"
                       cmakeContents += "      set (ctestArguments " + ctestArguments + " )\n"
                       cmakeContents += "\n"
@@ -605,7 +597,7 @@ class CMakeCreator(object):
     if(len(self.linuxReleaseOptions) != 0):
        cmakeContents += "      set(ADDITIONAL_RELEASE_OPTIONS " + self.linuxReleaseOptions + ")\n"
     else:
-        cmakeContents += "#     set(ADDITIONAL_RELEASE_OPTIONS " + "\"-Wall\"" + ")\n"
+        cmakeContents += "#    set(ADDITIONAL_RELEASE_OPTIONS " + "\"-Wall\"" + ")\n"
     cmakeContents += "    elseif(\"${CMAKE_SYSTEM_NAME}\" STREQUAL \"Windows\")\n"
     if(len(self.visualStudioReleaseOptions) != 0):
         cmakeContents += "      set(ADDITIONAL_RELEASE_OPTIONS " + self.visualStudioReleaseOptions + ")\n"
@@ -722,6 +714,10 @@ class CMakeCreator(object):
      print('The parameter that needs to be specified :')
      print('[',exception, ']')
      exit()
+     
+     
+  TRUE_VALS  = ( '1', 'true',  'True', 'TRUE',  'y', 'yes', 'Y', 'Yes', 'YES','ON','on','On')
+  FALSE_VALS = ( '0', 'false', 'False', 'FALSE','n', 'no',  'N', 'No',   'NO','OFF','off','Off')
 #   
 #
 #   Stub for executing the class defined in this file 
