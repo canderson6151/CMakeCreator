@@ -3,59 +3,61 @@
 
 <Common>
 
-  <required_cmake       value = "3.15" type = "string" />
-  <project              value = "Project_Name"     />
-
+  <required_cmake> 3.15  </required_cmake>
+  <project> Project_Name </project>
 
   <IncludeDirs>
-    <dir value = "../Components" />
+    <dir> ../Components </dir>
   </IncludeDirs>
 
   <AdditionalDebugOptions>
-    <linuxOption         value = "-Wall,  -Wno-pessimizing-move" />
-    <visualStudioOption  value = "/W4"   />
-    <visualStudioOption> /wd"4458""  </visualStudioOption/>
-    <macOption           value = "-Wall,  -Wno-pessimizing-move" />
+    <linuxOption>  -Wall,  -Wno-pessimizing-move  </linuxOption>       
+    <visualStudioOption> /W4, /wd"4458""          </visualStudioOption>
+    <macOption> -Wall,  -Wno-pessimizing-move     </macOption>           
   </AdditionalDebugOptions>
   
    <AdditionalReleaseOptions>
-    <linuxOption         value = "" />
-    <visualStudioOption  value = ""   />
-    <macOption           value = "" />
+    <linuxOption></linuxOption>      
+    <visualStudioOption></visualStudioOption>
+    <macOption>   </macOption> 
   </AdditionalReleaseOptions>
 
   <Library>
-    <libName value = "XML_ParameterList"/>
-    <libDir  value = "../Components/XML_ParameterList"/>
+    <libName> XML_ParameterList             </libName> 
+    <libDir>  ../Components/XML_ParameterList</libDir>  
   </Library>
 
+
   <CMakeModulesDir>
-    <dir value = "../Components/cmake_modules" />
+    <dir>../Components/cmake_modules </dir>"  
   </CMakeModulesDir> 
   
 </Common>
 
+
 <Options>
-  <USE_OPENMP   value = "ON"  />
-  <USE_LAPACK   value = "ON"  />
-  <USE_FFTW     value = "ON"  />
-  <USE_MKL      value = "ON"  />
-  <USE_SQLITE3  value = "ON"  />
-  <USE_MEMCHECK value = "OFF" /> <!-- allows use of ctest -T memcheck --> 
+  <USE_OPENMP>   OFF </USE_OPENMP> 
+  <USE_LAPACK>   ON  </USE_LAPACK>
+  <USE_MKL>      ON  </USE_MKL>  
+  <USE_FFTW>     ON  </USE_FFTW>
+  <USE_SQLITE3>  ON  </USE_SQLITE3>
+  <USE_MEMCHECK> OFF </USE_MEMCHECK> <!-- ON allows use of ctest -T memcheck --> 
 </Options>
 
+
+
 <BuildTargets>
-
   <Target>
-    <main                   value = "FirstProg.cpp"       />   
-    <additionalSource       value = "Support1.cpp"        />    
-    <additionalIncludeDir   value = "../MoreInclude.h"    />   
-    <ctest                  value = "true" type = "bool"  />    
-    <ctestArguments         value = "-f input.dat"        />    
-    <inputFile              value = "moreInput.dat"       />    
-    <defaultXML             value = "False" type = "bool" />   
+    <main>  FirstProg.cpp                   </main>   
+    <additionalSource> Support1.cpp         </additionalSource>
+    <additionalSource> Support2.cpp          </additionalSource>
+    <additionalIncludeDir> ../MoreIncludeDir </additionalIncludeDir>
+    <ctest>  true                            </ctest>    
+    <ctestArguments> -f input.dat            </ctestArguments>  
+    <inputFile>       input.dat               </inputFile>   
+    <inputFile>       moreData.dat            </inputFile>   
+    <defaultXML>      False                   </defaultXML>
   </Target>
-
 </BuildTargets>
 
 

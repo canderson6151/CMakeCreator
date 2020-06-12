@@ -340,9 +340,11 @@ class XML_ParameterListArray:
         val = paramElement.get('value',None)
         if(val == None):
             if(paramElement.text != None):
-               return paramElement.text.strip()
+               if(len(paramElement.text.strip()) != 0) : return paramElement.text.strip()
+               return None
         else:
-            return paramElement.get("value",None) 
+            if(len(val.strip()) != 0) : return val.strip()
+            return None
  
            
     def getValue(self,paramElement):

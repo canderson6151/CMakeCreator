@@ -169,12 +169,12 @@ class CMakeCreator(object):
             if(p.tag == "IncludeDirs"):
                 directories = p.findall("dir")
                 for q in directories:
-                    cmakeContents += "list(APPEND IncludeDirs \"${CMAKE_SOURCE_DIR}/" + paramList.getValue(q) + "\")\n"                   
+                    cmakeContents += "list(APPEND IncludeDirs \"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(q) + "\")\n"                   
     
     #
     # Capture additional compiler options  
     #
-    
+    options = ""
     self.linuxDebugOptions         = ""
     self.visualStudioDebugOptions  = ""
     self.macDebugOptions           = ""
@@ -184,21 +184,27 @@ class CMakeCreator(object):
                 optionValues = None
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.linuxDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                 
                 optionValues = None
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.visualStudioDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                       
                 optionValues = None       
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.macDebugOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "       
      
@@ -212,21 +218,27 @@ class CMakeCreator(object):
                 optionValues = None
                 optionValues = p.findall("linuxOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.linuxReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                     
                 optionValues = None
                 optionValues = p.findall("visualStudioOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.visualStudioReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                       
                 optionValues = None      
                 optionValues = p.findall("macOption")
                 for q in optionValues:
-                    optionSplit = paramList.getValueOrText(q).split(",") 
+                    options = paramList.getValueOrText(q)
+                    if(options != None) : optionSplit = options.split(",")
+                    else                : optionSplit = {}
                     for r in optionSplit :
                       self.macReleaseOptions += "\"" + r.strip().replace("\"","\\\"") + "\" "
                            
@@ -245,7 +257,7 @@ class CMakeCreator(object):
                 cmakeContents += "\n"
                 directories = p.findall("dir")
                 for q in directories:
-                    cmakeContents += "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/" + paramList.getValue(q) + "\")\n"
+                    cmakeContents += "list(APPEND CMAKE_MODULE_PATH \"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(q) + "\")\n"
                     CMakeModulesDirSet = True
     
     #
@@ -433,7 +445,7 @@ class CMakeCreator(object):
             
             additionalSourceParam = p.findall("additionalSource")
             for q in additionalSourceParam :
-                additionalSources.append(paramList.getValue(q))
+                additionalSources.append(paramList.getValueOrText(q))
             for q in additionalSources :
                 sourceFileList +=   "\"" + q + "\" "  
             
@@ -488,7 +500,7 @@ class CMakeCreator(object):
                       
             additionalIncludeParam = p.findall("additionalIncludeDir")
             for q in additionalIncludeParam :
-                additionalIncludeDirs.append(paramList.getValue(q))
+                additionalIncludeDirs.append(paramList.getValueOrText(q))
             for q in additionalIncludeDirs :
                 cmakeContents += "      target_include_directories(${mainExecName} PUBLIC \"" + q +"\" )\n"
                 
