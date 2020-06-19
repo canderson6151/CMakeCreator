@@ -305,6 +305,8 @@ class CMakeCreator(object):
                     cmakeContents += "#####################################################\n"
                     cmakeContents += "# Invoke build of supporting libraries (projects)    \n"
                     cmakeContents += "#####################################################\n"
+                    cmakeContents += "\n"
+                    cmakeContents += "include_directories(${IncludeDirs})\n"
     
                 externalLibraryFlag = True            
                 cmakeContents += "\n"
