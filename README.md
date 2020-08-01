@@ -25,7 +25,7 @@ Python 3
 
 ### Versioning
 
-Release : 1.0.4
+Release : 1.0.5
 
 ### Date
 

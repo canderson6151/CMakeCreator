@@ -491,10 +491,19 @@ class CMakeCreator(object):
                 cmakeContents +=  "#\n"
                 cmakeContents +=  "#     Supporting libraries and include directories \n"
                 cmakeContents +=  "#\n"
-    
             
-            for q in OptionNames :
+            # Make sure FFTW comes first to avoid conflicts with MKL versions 
+            
+            for q in OptionNames :       
+                if((q == "USE_FFTW")):
+                    #if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
+                    cmakeContents += "      if(USE_FFTW) \n"
+                    cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
+                    cmakeContents += "          target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
+                    cmakeContents += "      endif()\n\n"
                 
+            
+            for q in OptionNames :    
                 if((q == "USE_LAPACK")):
                     cmakeContents += "      if(USE_LAPACK) \n"
                     cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
@@ -505,12 +514,6 @@ class CMakeCreator(object):
                     cmakeContents += "         target_link_libraries(${mainExecName} PUBLIC OpenMP::OpenMP_CXX)\n"
                     cmakeContents += "      endif()\n\n"
                     
-                if((q == "USE_FFTW")):
-                    #if(not lapackFlag) : cmakeContents += "      target_link_libraries(${mainExecName}  PUBLIC  ${LAPACK_LIBRARIES})\n"
-                    cmakeContents += "      if(USE_FFTW) \n"
-                    cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
-                    cmakeContents += "          target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
-                    cmakeContents += "      endif()\n\n"
                     
                 if((q == "USE_SQLITE3")):
                     cmakeContents += "      if(USE_SQLITE3) \n"
