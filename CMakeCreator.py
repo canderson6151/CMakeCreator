@@ -346,13 +346,13 @@ class CMakeCreator(object):
         if((p == "USE_OPENMP")):
             cmakeContents += "\n"
             cmakeContents += self.getFragment("OpenMPfrag.dat")
-        if((p == "USE_FFTW")):
+        if(p == "USE_FFTW"):
             cmakeContents += "\n"
             cmakeContents += self.getFragment("FFTWfrag.dat")
             if(not CMakeModulesDirSet) :
                 print("Warning : cmake_modules directory path containing FindFFTW.cmake not set. ")
                 print("          Add CMakeModulesDir parameter specifying cmake_modules path  ")
-                print("          or remove option USE_FFTW. ")       
+                print("          or remove option USE_FFTW or USE_MKL_FFTW. ")       
         if((p == "USE_SQLITE3")):
             cmakeContents += "\n"
             cmakeContents += self.getFragment("SQlite3frag.dat") 
@@ -511,7 +511,7 @@ class CMakeCreator(object):
                     cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${FFTW_LIBRARIES})\n"
                     cmakeContents += "          target_include_directories(${mainExecName}  PUBLIC  ${FFTW_INCLUDES})\n"
                     cmakeContents += "      endif()\n\n"
-                        
+                    
                 if((q == "USE_SQLITE3")):
                     cmakeContents += "      if(USE_SQLITE3) \n"
                     cmakeContents += "          target_link_libraries(${mainExecName}  PUBLIC  ${SQLite3_LIBRARIES})\n"

@@ -38,8 +38,9 @@
 <Options>
   <USE_OPENMP>   OFF </USE_OPENMP> 
   <USE_LAPACK>   ON  </USE_LAPACK>
-  <USE_MKL>      ON  </USE_MKL>  
   <USE_FFTW>     ON  </USE_FFTW>
+  <USE_MKL>      ON  </USE_MKL>  
+  <USE_MKL_FFTW> ON  </USE_MKL_FFTW>
   <USE_SQLITE3>  ON  </USE_SQLITE3>
   <USE_MEMCHECK> OFF </USE_MEMCHECK> <!-- ON allows use of ctest -T memcheck --> 
 </Options>
