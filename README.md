@@ -25,11 +25,11 @@ Python 3
 
 ### Versioning
 
-Release : 1.0.5
+Release : 1.0.6
 
 ### Date
 
-August 1, 2020 
+Sept. 14, 2020 
 
 ### Authors
 

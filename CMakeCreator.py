@@ -292,7 +292,8 @@ class CMakeCreator(object):
     #################################################################
     #
     
-    externalLibraryFlag = False
+    externalLibraryFlag    = False
+    externalLibLinkDirFlag = False
     libraryCount        = 0
     toggleVal           = "OFF"
     if(commonList != None):
@@ -311,9 +312,14 @@ class CMakeCreator(object):
                 externalLibraryFlag = True            
                 cmakeContents += "\n"
                 libDir  = p.find("libDir")
+                libLinkDir = p.find("libLinkDir")
+                if(libDir != None) :
+                    cmakeContents += "add_subdirectory(\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "\" "
+                    cmakeContents += "\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "/build\")\n"
+                if(libLinkDir != None):
+                    cmakeContents +=  "list(APPEND ExternalLibLinkDirs \"" + paramList.getValueOrText(libLinkDir) +  "\")\n" 
+                    externalLibLinkDirFlag = True               
                 libName = p.find("libName")
-                cmakeContents += "add_subdirectory(\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "\" "
-                cmakeContents += "\"${CMAKE_SOURCE_DIR}/" + paramList.getValueOrText(libDir) + "/build\")\n"
                 cmakeContents +=  "list(APPEND ExternalLibs \"" + paramList.getValueOrText(libName) +  "\")\n"
       
     OptionNames = []
@@ -525,6 +531,10 @@ class CMakeCreator(object):
                 cmakeContents += "\n"
                 cmakeContents += "      target_link_libraries(${mainExecName} PUBLIC ${ExternalLibs})\n"
  
+            if(externalLibLinkDirFlag):
+                cmakeContents += "\n"
+                cmakeContents += "      target_link_directories(${mainExecName} PUBLIC ${ExternalLibLinkDirs})\n"          
+                    
             cmakeContents += "\n"
             cmakeContents += "      target_include_directories(${mainExecName} PUBLIC ${IncludeDirs} ) \n"
             

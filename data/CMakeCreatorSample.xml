@@ -52,9 +52,12 @@
   </AdditionalReleaseOptions>
 
   
-  <!-- Libraries to be built and linked (optional) --> 
-  <!-- Multiple instances of <Library> allowed.    --> 
-  
+  <!-- Libraries to be built and linked (optional)     --> 
+  <!-- Multiple instances of <Library> allowed.        --> 
+  <!-- System libraries which do not need to be built  -->
+  <!-- are specifed by only specifying libName. If a   -->
+  <!-- machine specific location is be searched then   -->
+  <!-- this is specified as a libraryLinkDir.          -->
   
   <Library>
     <libName> XML_ParameterList               </libName> 
@@ -66,7 +69,10 @@
     <libDir>  ../Components/Asupport   </libDir>  
   </Library>
   
-  
+   <Library>
+    <libName>    AsystemLibrary </libName> 
+    <libLinkDir> /usr/local/lib </libLinkDir> <!-- Optional location introduces platform dependence -->
+  </Library>
   
   <!-- Specification of cmake_modules directory that -->
   <!-- contains the file FindFFTW.cmake              -->
